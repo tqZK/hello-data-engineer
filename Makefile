@@ -2,6 +2,8 @@ VENV_NAME = venv
 VENV_ACTIVATE_PATH = $(VENV_NAME)/bin/activate
 output_path = output.csv
 
+.PHONY: venv
+
 venv:
 	@echo "==================== Create virtual environment ========================"
 	python3 -m virtualenv ./$(VENV_NAME)
@@ -10,7 +12,8 @@ venv:
 
 test:
 	@echo "==================== Run unittests ====================================="
-	@echo "Sorry, no tests so far :("
+	. ./$(VENV_ACTIVATE_PATH) && \
+	python3 -m unittest
 
 run:
 	@echo "==================== Run clicstream parser ============================="
