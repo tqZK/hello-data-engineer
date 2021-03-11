@@ -21,5 +21,19 @@ class TestParseClickstreamLogs(TestCase):
     def test_read_input_file(self):
         input_path = 'test_path'
         result = parse_clickstream_logs.read_input_file(input_path)
-        expected = pd.DataFrame({"url": [EXAMPLE]})
+        expected = pd.DataFrame({"url_orig": [EXAMPLE]})
         self.assertEqual(assert_frame_equal(result, expected), None)
+
+    def test_parse_input_data(self):
+        test_df = pd.DataFrame({"url_orig": [EXAMPLE]})
+        df_result = parse_clickstream_logs.parse_input_data(test_df)
+        df_expected = pd.DataFrame({
+            "url_orig": [EXAMPLE],
+            "url": ["https://dis.fun.com/wiki/Madam_Mim"],
+            "lang": ["en-us"],
+            "timestamp": [pd.Timestamp("2021-02-09T23:59:53Z")],
+            "user_id": ["2f2fee88f2e665659dbe7dc8dfc17d81"],
+            "article_id": ["6081"],
+            "wiki_id": ["374"]
+        })
+        self.assertEqual(assert_frame_equal(df_expected, df_result), None)
