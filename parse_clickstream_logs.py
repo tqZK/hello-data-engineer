@@ -1,7 +1,10 @@
 import argparse
 from urllib import parse
 
+import numpy as np
 import pandas as pd
+
+COLUMNS_TO_SAVE = ["user_id", "is_same_article", "is_same_wiki"]
 
 
 def read_input_file(input_path):
@@ -28,19 +31,48 @@ def parse_input_data(df):
     return pd.concat([df, df.url_orig.apply(lambda url: pd.Series(parse_url(url)))], axis=1)
 
 
-def process_data(data):
-    pass
+def is_same_wiki_and_article(row):
+    is_same_article = False
+    is_same_wiki = False
+    if row["wiki_id_last"] == row["wiki_id_first"]:
+        is_same_wiki = True
+        if row["article_id_last"] == row["article_id_first"]:
+            is_same_article = True
+    return {
+        "is_same_article": is_same_article,
+        "is_same_wiki": is_same_wiki
+    }
 
 
-def save_output_file(output_path, data):
-    pass
+def process_data(df):
+    df_filtered = df.groupby('user_id').filter(lambda x: len(x) > 2)
+    df_grouped = df_filtered.groupby('user_id')
+    columns_to_keep = [
+        'user_id',
+        'article_id',
+        'wiki_id'
+    ]
+    df_user_events = df_filtered.loc[df_grouped["timestamp"].idxmin(), columns_to_keep].merge(
+        df_filtered.loc[df_grouped["timestamp"].idxmax(), columns_to_keep],
+        on="user_id",
+        suffixes=("_first", "_last")
+    )
+    df_final = pd.concat([
+        df_user_events,
+        df_user_events.apply(lambda row: pd.Series(is_same_wiki_and_article(row)), axis=1)
+    ], axis=1)
+    return df_final
+
+
+def save_output_file(output_path, df):
+    df.sort_values(by=['user_id']).to_csv(output_path, columns=COLUMNS_TO_SAVE)
 
 
 def parse_clickstream_logs(input_path, output_path):
-    data = read_input_file(input_path)
-    data = parse_input_file(data)
-    data = process_data(data)
-    save_output_file(output_path, data)
+    df = read_input_file(input_path)
+    df = parse_input_data(df)
+    df = process_data(df)
+    save_output_file(output_path, df)
 
 
 if __name__ == '__main__':
