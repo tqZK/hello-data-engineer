@@ -17,11 +17,11 @@ EXAMPLE = "https://dis.fun.com/wiki/Madam_Mim|" \
 
 class TestParseClickstreamLogs:
 
-    @patch('parse_clickstream_logs.open', new_callable=mock_open, read_data=EXAMPLE)
+    @patch('parse_clickstream_logs.open', new_callable=mock_open, read_data=f"{EXAMPLE}\n{EXAMPLE}")
     def test_read_input_file(self, mock_file):
         input_path = 'test_path'
         result = parse_clickstream_logs.read_input_file(input_path)
-        expected = pd.DataFrame({"url_orig": [EXAMPLE]})
+        expected = pd.DataFrame({"url_orig": [EXAMPLE, EXAMPLE]})
         assert assert_frame_equal(result, expected, check_like=True) is None
         mock_file.assert_called_with(input_path, 'r')
 
