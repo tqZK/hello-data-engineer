@@ -10,10 +10,15 @@ venv:
 	. ./$(VENV_ACTIVATE_PATH) && \
 	python3 -m pip install -r requirements.txt
 
+venv-dev: venv
+	@echo "==================== Create virtual environment for developers ========="
+	. ./$(VENV_ACTIVATE_PATH) && \
+	python3 -m pip install -r requirements-dev.txt
+
 test:
 	@echo "==================== Run unittests ====================================="
 	. ./$(VENV_ACTIVATE_PATH) && \
-	python3 -m unittest
+	python3 -m pytest
 
 run:
 	@echo "==================== Run clicstream parser ============================="
